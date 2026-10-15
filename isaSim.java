@@ -16,6 +16,7 @@ public class isaSim {
         if (!args[1].equals("-r") || !args[1].equals("-s")){
             System.out.println("Please input what mode the simulator should run in");
             System.out.println("Input \"-r\" for run straight through. Input \"-s\" for run step-by-step");
+            exit(1);
         }
     }
 }
