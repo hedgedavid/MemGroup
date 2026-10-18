@@ -1,8 +1,12 @@
 
+import java.io.IOException;
 import static java.lang.System.exit;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 
 /**
@@ -58,8 +62,54 @@ public class isaSim {
             write the final contents of the memory to the appropriately named .out file(e.g. <benchmarkName>.mem.out)
 
      */
+    @SuppressWarnings("UseSpecificCatch")
     private static void StepByStep() {
+        Scanner scn = new Scanner(System.in);
+        int linesToSkip = 0;
+        Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
+        while (linesToSkip > 0){ // TODO: while file still has next line/There are still instructions to be executed
+            // Run through instruction
+            // Count the contents of all the registers mentioned in the RTL
+            // Print the total number of instructions executed so far
+            int total = 0;
+            for (int n: count.values()) total += n;
+            System.out.println("Total Number of Instructions Executed: " + total);
 
+            // Wait for user input before beginning next line
+            if (linesToSkip > 0)
+                try {
+                    linesToSkip = Integer.parseInt(scn.nextLine());
+                } catch(Exception e) {
+                    System.out.println("Please input a valid number. Skipping 0 for now");
+                }
+            else
+                linesToSkip--;
+        }
+
+        // Write instruction count to a file called <benchmarkName>.instrCount
+        Path output = Paths.get("memoryGroupBenchmark.instrCount");
+        // Display the number of times each instruction was executed to the user as well
+        System.out.println("The number of times instructions have been executed");
+        int total = 0;
+        for (Map.Entry<String, Integer> entry : count.entrySet()) {
+            String countInfo = entry.getKey() + ": " + entry.getValue();
+            total += entry.getValue();
+            System.out.println(countInfo);
+            try {
+                Files.writeString(output, countInfo);
+            } catch (IOException e) {
+                System.err.println("Could not write file: " + e.getMessage());
+            }
+        }
+        // Write the total amount of instructions executed to the output file
+        try {
+            Files.writeString(output, total + "");
+        } catch (IOException e) {
+            System.err.println("Could not write file: " + e.getMessage());
+        }
+
+        // TODO: Write the final contents of the memory to the appropriately named .out file <benchmarkName>.mem.out
+        scn.close();
     }
 
     /**
