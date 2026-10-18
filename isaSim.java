@@ -32,8 +32,8 @@ public class isaSim {
 
 
         // Run Through or Step by Step
-        if (args[0].equals("-s")) StepByStep();
-        else RunThrough();
+        if (args[0].equals("-s")) StepByStep(args[1], args[2]);
+        else RunThrough(args[1], args[2]);
     }
 
     private static boolean CheckFilePath(String pathToString) {
@@ -60,10 +60,9 @@ public class isaSim {
             Display to the console the number of times each instruction was executed (e.g. how many times was add executed, how many times was beq executed, etc.)
             Write the instruction count information out to a file called <benchmarkName>.instrCount
             write the final contents of the memory to the appropriately named .out file(e.g. <benchmarkName>.mem.out)
-
      */
     @SuppressWarnings("UseSpecificCatch")
-    private static void StepByStep() {
+    private static void StepByStep(String asFile, String memFile) {
         Scanner scn = new Scanner(System.in);
         int linesToSkip = 0;
         Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
@@ -108,7 +107,15 @@ public class isaSim {
             System.err.println("Could not write file: " + e.getMessage());
         }
 
-        // TODO: Write the final contents of the memory to the appropriately named .out file <benchmarkName>.mem.out
+        // Write the final contents of the memory to the appropriately named .out file <benchmarkName>.mem.out
+        Path source = Paths.get("input.txt");
+        Path target = Paths.get("memoryGroupBenchmark.mem.out");
+
+        try {
+            Files.copy(source, target);
+        } catch (IOException e) {
+            System.err.println("Copy failed: " + e.getMessage());
+        }
         scn.close();
     }
 
@@ -119,7 +126,7 @@ public class isaSim {
             Write the instruction count information out to a file called <benchmarkName>.instrCount
             write the final contents of the memory to the appropriately named .out file(e.g. <benchmarkName>.mem.out)
      */
-    private static void RunThrough() {
+    private static void RunThrough(String asFile, String memFile) {
 
     }
 }
