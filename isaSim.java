@@ -52,14 +52,16 @@ public class isaSim {
     /**
      * Step By Step function for the isa benchmark
      *  At each step, display: 
-            the current contents of all the registers mentioned in the RTL (e.g. PC, register file, etc.)
-        Total number of instructions executed so far
-        Wait for user to press enter before executing the next step (If you want to bonus it up, you may allow the user to enter a number of 
-         steps to execute before pausing and displaying the required data. That is not required, though)
-        At end of execution of the benchmark, 
-            Display to the console the number of times each instruction was executed (e.g. how many times was add executed, how many times was beq executed, etc.)
-            Write the instruction count information out to a file called <benchmarkName>.instrCount
-            write the final contents of the memory to the appropriately named .out file(e.g. <benchmarkName>.mem.out)
+     *      the current contents of all the registers mentioned in the RTL (e.g. PC, register file, etc.)
+     *  Total number of instructions executed so far
+     *  Wait for user to press enter before executing the next step (If you want to bonus it up, you may allow the user to enter a number of 
+     *   steps to execute before pausing and displaying the required data. That is not required, though)
+     *  At end of execution of the benchmark, 
+     *      Display to the console the number of times each instruction was executed (e.g. how many times was add executed, how many times was beq executed, etc.)
+     *      Write the instruction count information out to a file called <benchmarkName>.instrCount
+     *      write the final contents of the memory to the appropriately named .out file(e.g. <benchmarkName>.mem.out)
+     * @param asFile assembly File
+     * @param memFile memory File
      */
     @SuppressWarnings("UseSpecificCatch")
     private static void StepByStep(String asFile, String memFile) {
@@ -122,9 +124,11 @@ public class isaSim {
     /**
      * Run Through function for the isa benchmark
      *  At the end of execution of the benchmark,
-            Display to the console the number of times each instruction was executed (e.g. how many times was add executed, how many times was beq executed, etc.)
-            Write the instruction count information out to a file called <benchmarkName>.instrCount
-            write the final contents of the memory to the appropriately named .out file(e.g. <benchmarkName>.mem.out)
+     *      Display to the console the number of times each instruction was executed (e.g. how many times was add executed, how many times was beq executed, etc.)
+     *      Write the instruction count information out to a file called <benchmarkName>.instrCount
+     *      write the final contents of the memory to the appropriately named .out file(e.g. <benchmarkName>.mem.out)
+     * @param asFile assembly File
+     * @param memFile memory File
      */
     private static void RunThrough(String asFile, String memFile) {
         Scanner scn = new Scanner(System.in);
