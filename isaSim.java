@@ -66,7 +66,7 @@ public class isaSim {
         Scanner scn = new Scanner(System.in);
         int linesToSkip = 0;
         Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
-        while (linesToSkip > 0){ // TODO: while file still has next line/There are still instructions to be executed
+        while (linesToSkip > 1){ // TODO: while file still has next line/There are still instructions to be executed
             // Run through instruction
             // Count the contents of all the registers mentioned in the RTL
             // Print the total number of instructions executed so far
@@ -108,7 +108,7 @@ public class isaSim {
         }
 
         // Write the final contents of the memory to the appropriately named .out file <benchmarkName>.mem.out
-        Path source = Paths.get("input.txt");
+        Path source = Paths.get(memFile);
         Path target = Paths.get("memoryGroupBenchmark.mem.out");
 
         try {
@@ -127,6 +127,44 @@ public class isaSim {
             write the final contents of the memory to the appropriately named .out file(e.g. <benchmarkName>.mem.out)
      */
     private static void RunThrough(String asFile, String memFile) {
+        Scanner scn = new Scanner(System.in);
+        int linesToSkip = 0;
+        Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
+        while (linesToSkip > 1){ // TODO: while file still has next line/There are still instructions to be executed
+        
+        }
 
+        // Write instruction count to a file called <benchmarkName>.instrCount
+        Path output = Paths.get("memoryGroupBenchmark.instrCount");
+        // Display the number of times each instruction was executed to the user as well
+        System.out.println("The number of times instructions have been executed");
+        int total = 0;
+        for (Map.Entry<String, Integer> entry : count.entrySet()) {
+            String countInfo = entry.getKey() + ": " + entry.getValue();
+            total += entry.getValue();
+            System.out.println(countInfo);
+            try {
+                Files.writeString(output, countInfo);
+            } catch (IOException e) {
+                System.err.println("Could not write file: " + e.getMessage());
+            }
+        }
+        // Write the total amount of instructions executed to the output file
+        try {
+            Files.writeString(output, total + "");
+        } catch (IOException e) {
+            System.err.println("Could not write file: " + e.getMessage());
+        }
+
+        // Write the final contents of the memory to the appropriately named .out file <benchmarkName>.mem.out
+        Path source = Paths.get(memFile);
+        Path target = Paths.get("memoryGroupBenchmark.mem.out");
+
+        try {
+            Files.copy(source, target);
+        } catch (IOException e) {
+            System.err.println("Copy failed: " + e.getMessage());
+        } 
+        scn.close();
     }
 }
