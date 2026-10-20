@@ -14,26 +14,32 @@ import java.util.Scanner;
  * @author David Hedge, Dakotah Williams, Dedi Seme, Haylee Staub
  */
 public class isaSim {
+    private static int PC = 0;
+    private static int[] registers = new int[32];
+
     public static void main(String[] args) {
         // Check if the input is correct
-        if (args.length < 3){
+        if (args.length != 3){
             System.out.println("Incorrect number of arguments entered in the command line.");
             System.out.println("Needs to be in format \" $ isaSim <r|s> <assembly file> <memory file>\"");
-            exit(1);
+            System.exit(1);
         }
         if (!args[0].equals("-r") && !args[0].equals("-s")){
             System.out.println("Please input what mode the simulator should run in");
             System.out.println("Input \"-r\" for run straight through. Input \"-s\" for run step-by-step");
-            exit(1);
+            System.exit(1);
         }
 
         // Check if the provided files are accurate
-        if (!CheckFilePath(args[1]) || !CheckFilePath(args[2])) exit(1);
+        if (!CheckFilePath(args[1]) || !CheckFilePath(args[2])) System.exit(1);
 
 
         // Run Through or Step by Step
-        if (args[0].equals("-s")) StepByStep(args[1], args[2]);
-        else RunThrough(args[1], args[2]);
+        if (args[0].equals("-s")) {
+            StepByStep(args[1], args[2]);
+        } else {
+            RunThrough(args[1], args[2]);
+        }
     }
 
     private static boolean CheckFilePath(String pathToString) {
@@ -67,9 +73,17 @@ public class isaSim {
     private static void StepByStep(String asFile, String memFile) {
         Scanner scn = new Scanner(System.in);
         int linesToSkip = 0;
+        String benchmarkName = getBenchmarkName(asFile);
         Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
-        while (linesToSkip > 1){ // TODO: while file still has next line/There are still instructions to be executed
+        String[] instructions = loadInstructions(asFile);
+
+        int totalInstructionsExecuted = 0;
+        int stepsRemaining = 1;
+
+        while (PC < instructions.length){ // TODO: while file still has next line/There are still instructions to be executed
             // Run through instruction
+            String currInstruction = instructions[PC];
+
             // Count the contents of all the registers mentioned in the RTL
             // Print the total number of instructions executed so far
             int total = 0;
@@ -88,7 +102,7 @@ public class isaSim {
         }
 
         // Write instruction count to a file called <benchmarkName>.instrCount
-        Path output = Paths.get("memoryGroupBenchmark.instrCount");
+        Path output = Paths.get(benchmarkName + ".instrCount");
         // Display the number of times each instruction was executed to the user as well
         System.out.println("The number of times instructions have been executed");
         int total = 0;
@@ -111,7 +125,7 @@ public class isaSim {
 
         // Write the final contents of the memory to the appropriately named .out file <benchmarkName>.mem.out
         Path source = Paths.get(memFile);
-        Path target = Paths.get("memoryGroupBenchmark.mem.out");
+        Path target = Paths.get(benchmarkName + ".mem.out");
 
         try {
             Files.copy(source, target);
@@ -133,13 +147,14 @@ public class isaSim {
     private static void RunThrough(String asFile, String memFile) {
         Scanner scn = new Scanner(System.in);
         int linesToSkip = 0;
+        String benchmarkName = getBenchmarkName(asFile);
         Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
         while (linesToSkip > 1){ // TODO: while file still has next line/There are still instructions to be executed
         
         }
 
         // Write instruction count to a file called <benchmarkName>.instrCount
-        Path output = Paths.get("memoryGroupBenchmark.instrCount");
+        Path output = Paths.get(benchmarkName + ".instrCount");
         // Display the number of times each instruction was executed to the user as well
         System.out.println("The number of times instructions have been executed");
         int total = 0;
@@ -162,7 +177,7 @@ public class isaSim {
 
         // Write the final contents of the memory to the appropriately named .out file <benchmarkName>.mem.out
         Path source = Paths.get(memFile);
-        Path target = Paths.get("memoryGroupBenchmark.mem.out");
+        Path target = Paths.get(benchmarkName + ".mem.out");
 
         try {
             Files.copy(source, target);
@@ -170,5 +185,35 @@ public class isaSim {
             System.err.println("Copy failed: " + e.getMessage());
         } 
         scn.close();
+    }
+
+    /**
+     * Private helper method to read instructions from a given
+     * assembly file 
+     * 
+     * @param asFile assembly file
+     * @return String array of all instructions in file
+     */
+    private static String[] loadInstructions(String asFile) {
+        String[] error = new String[0];
+        try {
+            String instruction = Files.readString(Paths.get(asFile));
+            return instruction.split("\\n");
+        } catch (IOException e) {
+            System.err.println("Could not load instructions from assembly file: " + e.getMessage());
+            return error; 
+        }
+    }
+
+    /**
+     * Private method to extract a given benchmark's file name
+     * from the provided file path
+     * 
+     * @param asFile file path
+     * @return filename of the benchmark as a String
+     */
+    private static String getBenchmarkName(String asFile) {
+        String fileName = Paths.get(asFile).getFileName().toString();
+        return fileName.split("\\.")[0];
     }
 }
