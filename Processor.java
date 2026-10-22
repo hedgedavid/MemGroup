@@ -1,4 +1,7 @@
+import java.lang.reflect.Array;
 import java.security.InvalidParameterException;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Processor implements ProcessorInterface{
@@ -10,6 +13,8 @@ public class Processor implements ProcessorInterface{
     private Byte register[][];
 
     private Byte[][] memory;
+
+    boolean isHalt; // if ture the program will not run another instruction till it reset
     
 
     
@@ -48,8 +53,64 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void phaseInstruction(Byte[] instruction) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'phaseInstruction'");
+        Byte sample = (byte)(instruction[0] >> 4);
+
+        Byte[] register1 = register[instruction[0] & 0x0F];
+        Byte[] register2 = register[(instruction[1] & 0xF0) >> 4];
+        Byte[] register3 = register[instruction[1] & 0x0F];
+
+        switch(sample){
+            case 0x00:
+                ADD(register1, register2, register3);
+                break;
+            case 0x01:
+                MUL(register1, register2, register3);
+                break;
+            case 0x02:
+                ADDF(register1, register2, register3);
+                break;
+            case 0x03:
+                MULF(register1, register2, register3);
+                break;
+            case 0x04:
+                int IAddress = (int)(((instruction[0] & 0x0F) << 8) | (instruction[1] & 0xFF));
+                LOADI(register1, IAddress);
+                break;
+            case 0x05:
+                LOAD(register1, register2);
+                break;
+            case 0x06:
+                STORE(register1, register2);
+                break;
+            case 0x07:
+                JMP(register1);
+                break;
+            case 0x08:
+                JMPL(register1, register2);
+                break;
+            case 0x09:
+                JMPE(register1, register2);
+                break;
+            case 0x0A:
+                AND(register1, register2, register3);
+                break;
+            case 0x0B:
+                OR(register1, register2, register3);
+                break;
+            case 0x0C:
+                NOT(register1, register2);
+                break;
+            case 0x0D:
+                LSL(register1, register2, register3);
+                break;
+            case 0x0E:
+                LSR(register1, register2, register3);
+                break;
+            case 0x0F:
+                HALT();
+                break;
+                
+        }
     }
 
 
@@ -57,8 +118,11 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void ADD(Byte[] register1, Byte[] register2, Byte[] register3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'ADD'");
+        int num1 = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
+        int num2 = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
+        int result = num1 + num2;
+        register3[0] = (byte)((result & 0xFF00) >> 8);
+        register3[1] = (byte)(result & 0xFF);
     }
 
 
@@ -66,8 +130,11 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void MUL(Byte[] register1, Byte[] register2, Byte[] register3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'MUL'");
+        int num1 = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
+        int num2 = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
+        int result = num1 * num2;
+        register3[0] = (byte)((result & 0xFF00) >> 8);
+        register3[1] = (byte)(result & 0xFF);
     }
 
 
@@ -75,8 +142,14 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void ADDF(Byte[] register1, Byte[] register2, Byte[] register3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'ADDF'");
+        float num1 = Float.float16ToFloat((short)(((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF)));
+        float num2 = Float.float16ToFloat((short)(((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF)));
+
+        float result = num1 + num2;
+        short halfFloat = Float.floatToFloat16(result);
+
+        register3[0] = (byte)((halfFloat & 0xFF00) >> 8);
+        register3[1] = (byte)(halfFloat & 0xFF);
     }
 
 
@@ -84,17 +157,22 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void MULF(Byte[] register1, Byte[] register2, Byte[] register3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'MULF'");
+        float num1 = Float.float16ToFloat((short)(((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF)));
+        float num2 = Float.float16ToFloat((short)(((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF)));
+
+        float result = num1 * num2;
+        short halfFloat = Float.floatToFloat16(result);
+
+        register3[0] = (byte)((halfFloat & 0xFF00) >> 8);
+        register3[1] = (byte)(halfFloat & 0xFF);
     }
 
 
 
 
     @Override
-    public void LOADI(Byte[] register1, Byte[] IAddress) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'LOADI'");
+    public void LOADI(Byte[] register1, int IAddress) {
+        register1 = memory[IAddress];
     }
 
 
@@ -102,8 +180,7 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void LOAD(Byte[] register1, Byte[] register2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'LOAD'");
+        register1 = memory[(int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF))];
     }
 
 
@@ -111,8 +188,7 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void STORE(Byte[] register1, Byte[] register2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'STORE'");
+        memory[(int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF))] = register1;
     }
 
 
@@ -120,8 +196,7 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void JMP(Byte[] register1) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'JMP'");
+        PC = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
     }
 
 
@@ -129,8 +204,7 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void JMPL(Byte[] register1, Byte[] register2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'JMPL'");
+        
     }
 
 
@@ -203,13 +277,22 @@ public class Processor implements ProcessorInterface{
         
 
 
-        Stream<String> instructionStream = program.lines();
-        int lineCount = (int)instructionStream.count();
+        
+        
+
+        List<String> list = program.lines().toList();
+
+        int lineCount = list.size();
+
         memory = new Byte[lineCount][2];
+        
+
+        String temp = null;
 
         for(int i = 0; i < lineCount; i++){
-            memory[i][0] = (byte)5;
-            memory[i][1] = (byte)5;
+            temp = list.get(i);
+            memory[i][0] = (byte)((phaseHexChartoBinary(temp.charAt(0)) << 4) + phaseHexChartoBinary(temp.charAt(1)));
+            memory[i][1] = (byte)((phaseHexChartoBinary(temp.charAt(2)) << 4) + phaseHexChartoBinary(temp.charAt(3)));
         }
     }
 
@@ -226,6 +309,9 @@ public class Processor implements ProcessorInterface{
         
         
     }
+
+
+    
 
 
 

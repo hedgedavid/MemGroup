@@ -62,7 +62,7 @@ public interface ProcessorInterface {
      * @param register1
      * @param IAddress
      */
-    public void LOADI(Byte[] register1, Byte[] IAddress);
+    public void LOADI(Byte[] register1, int IAddress);
 
     /**
      * load data from memory at address register2
