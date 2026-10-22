@@ -1,14 +1,31 @@
+import java.security.InvalidParameterException;
+import java.util.stream.Stream;
+
 public class Processor implements ProcessorInterface{
 
+    final int NUMBER_OF_REG = 16;
     
     private int PC;
     
-    private char register[];
+    private Byte register[][];
+
+    private Byte[][] memory;
+    
+
+    
 
 
     public Processor(){
         this.PC = 0;
+        this.register = new Byte[NUMBER_OF_REG][2];
+        memory = null; //since program hasn't been added, there's no way determining the size
     }
+
+    public Processor(String program){
+        this();
+        loadProgram(program); //use the program string to load the program into the memory 
+    }
+        
 
 
 
@@ -16,6 +33,8 @@ public class Processor implements ProcessorInterface{
     public int getPC(){
         return this.PC;
     }
+
+
 
 
     @Override
@@ -37,7 +56,7 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void ADD(Byte[] register1, Byte[] register2) {
+    public void ADD(Byte[] register1, Byte[] register2, Byte[] register3) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'ADD'");
     }
@@ -46,7 +65,7 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void MUL(Byte[] register1, Byte[] register2) {
+    public void MUL(Byte[] register1, Byte[] register2, Byte[] register3) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'MUL'");
     }
@@ -55,7 +74,7 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void ADDF(Byte[] register1, Byte[] register2) {
+    public void ADDF(Byte[] register1, Byte[] register2, Byte[] register3) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'ADDF'");
     }
@@ -64,7 +83,7 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void MULF(Byte[] register1, Byte[] register2) {
+    public void MULF(Byte[] register1, Byte[] register2, Byte[] register3) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'MULF'");
     }
@@ -100,7 +119,7 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void JMP(Byte[] register1, Byte[] register2) {
+    public void JMP(Byte[] register1) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'JMP'");
     }
@@ -127,7 +146,7 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void AND(Byte[] register1, Byte[] register2) {
+    public void AND(Byte[] register1, Byte[] register2, Byte[] register3) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'AND'");
     }
@@ -136,7 +155,7 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void OR(Byte[] register1, Byte[] register2) {
+    public void OR(Byte[] register1, Byte[] register2, Byte[] register3) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'OR'");
     }
@@ -154,7 +173,7 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void LSL(Byte[] register1, Byte[] register2) {
+    public void LSL(Byte[] register1, Byte[] register2, Byte[] register3) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'LSL'");
     }
@@ -163,7 +182,7 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void LSR(Byte[] register1, Byte[] register2) {
+    public void LSR(Byte[] register1, Byte[] register2, Byte[] register3) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'LSR'");
     }
@@ -172,8 +191,44 @@ public class Processor implements ProcessorInterface{
 
 
     @Override
-    public void HALT(Byte[] register1, Byte[] register2) {
+    public void HALT() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'HALT'");
     }
+
+
+    @Override
+    public void loadProgram(String program) {
+
+        
+
+
+        Stream<String> instructionStream = program.lines();
+        int lineCount = (int)instructionStream.count();
+        memory = new Byte[lineCount][2];
+
+        for(int i = 0; i < lineCount; i++){
+            memory[i][0] = (byte)5;
+            memory[i][1] = (byte)5;
+        }
+    }
+
+
+    public static Byte phaseHexChartoBinary(char character){
+        if(Character.isDigit(character)){
+            return (byte) ((int)character - (int)'0');
+        } else if (Character.isUpperCase(character) && character <= 'F'){
+            return (byte) ((int)character - (int)'A' + 10);
+        } else{
+            throw new InvalidParameterException();
+        }
+        
+        
+        
+    }
+
+
+
+    
+        
 }

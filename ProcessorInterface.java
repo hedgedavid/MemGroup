@@ -145,4 +145,12 @@ public interface ProcessorInterface {
      * halt and stop the program
      */
     public void HALT();
+
+    /**
+     * load the program with input string in hexdecimal format
+     * doing so will also reset the PC to 0
+     */
+    public void loadProgram(String program);
 }
+
+
