@@ -12,7 +12,7 @@ public class Processor implements ProcessorInterface{
     
     private Byte register[][];
 
-    private Byte[][] memory;
+    private Byte[] memory;
 
     boolean isHalt; // if ture the program will not run another instruction till it reset
     
@@ -172,7 +172,8 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void LOADI(Byte[] register1, int IAddress) {
-        register1 = memory[IAddress];
+        register1[0] = memory[IAddress];
+        register1[0] = memory[IAddress + 1];
     }
 
 
@@ -180,7 +181,9 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void LOAD(Byte[] register1, Byte[] register2) {
-        register1 = memory[(int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF))];
+        int iAddress = (int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF));
+        register1[0] = memory[iAddress];
+        register1[1] = memory[iAddress + 1];
     }
 
 
@@ -188,7 +191,9 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void STORE(Byte[] register1, Byte[] register2) {
-        memory[(int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF))] = register1;
+        int iAddress = (int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF));
+        memory[ iAddress] = register1[0];
+        memory[ iAddress + 1] = register1[1];
     }
 
 
@@ -204,7 +209,11 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void JMPL(Byte[] register1, Byte[] register2) {
-        
+
+        short num = (short)((register2[0] << 8) | register2[1]);
+        if(num < 0){
+            PC = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
+        }
     }
 
 
@@ -212,8 +221,10 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void JMPE(Byte[] register1, Byte[] register2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'JMPE'");
+        short num = (short)((register2[0] << 8) | register2[1]);
+        if(num == 0){
+            PC = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
+        }
     }
 
 
@@ -221,8 +232,8 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void AND(Byte[] register1, Byte[] register2, Byte[] register3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'AND'");
+        register3[0] = (byte)(register1[0] & register2[0]);
+        register3[1] = (byte)(register1[1] & register2[1]);
     }
 
 
@@ -230,8 +241,8 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void OR(Byte[] register1, Byte[] register2, Byte[] register3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'OR'");
+        register3[0] = (byte)(register1[0] | register2[0]);
+        register3[1] = (byte)(register1[1] | register2[1]);
     }
 
 
@@ -239,8 +250,8 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void NOT(Byte[] register1, Byte[] register2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'NOT'");
+        register1[0] = (byte)~register2[0];
+        register1[1] = (byte)~register2[1];
     }
 
 
@@ -248,8 +259,12 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void LSL(Byte[] register1, Byte[] register2, Byte[] register3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'LSL'");
+        short num1 = (short)((register1[0] << 8) | register1[1]);
+        short num2 = (short)((register2[0] << 8) | register2[1]);
+        short num3 = (short)(num1 << num2);
+
+        register3[0] = (byte)((num3 & 0xFF00) << 8);
+        register3[1] = (byte)((num3 & 0x00FF));
     }
 
 
@@ -257,8 +272,12 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void LSR(Byte[] register1, Byte[] register2, Byte[] register3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'LSR'");
+        short num1 = (short)((register1[0] << 8) | register1[1]);
+        short num2 = (short)((register2[0] << 8) | register2[1]);
+        short num3 = (short)(num1 >> num2);
+
+        register3[0] = (byte)((num3 & 0xFF00) << 8);
+        register3[1] = (byte)((num3 & 0x00FF));
     }
 
 
@@ -266,8 +285,7 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void HALT() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'HALT'");
+        isHalt = true;
     }
 
 
@@ -284,15 +302,15 @@ public class Processor implements ProcessorInterface{
 
         int lineCount = list.size();
 
-        memory = new Byte[lineCount][2];
+        memory = new Byte[lineCount * 2];
         
 
         String temp = null;
 
         for(int i = 0; i < lineCount; i++){
             temp = list.get(i);
-            memory[i][0] = (byte)((phaseHexChartoBinary(temp.charAt(0)) << 4) + phaseHexChartoBinary(temp.charAt(1)));
-            memory[i][1] = (byte)((phaseHexChartoBinary(temp.charAt(2)) << 4) + phaseHexChartoBinary(temp.charAt(3)));
+            memory[i] = (byte)((phaseHexChartoBinary(temp.charAt(0)) << 4) + phaseHexChartoBinary(temp.charAt(1)));
+            memory[i + 1] = (byte)((phaseHexChartoBinary(temp.charAt(2)) << 4) + phaseHexChartoBinary(temp.charAt(3)));
         }
     }
 
