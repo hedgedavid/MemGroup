@@ -1,6 +1,7 @@
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
-import static java.lang.System.exit;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,9 +15,6 @@ import java.util.Scanner;
  * @author David Hedge, Dakotah Williams, Dedi Seme, Haylee Staub
  */
 public class isaSim {
-    private static int PC = 0;
-    private static int[] registers = new int[32];
-
     public static void main(String[] args) {
         // Check if the input is correct
         if (args.length != 3){
@@ -72,66 +70,29 @@ public class isaSim {
     @SuppressWarnings("UseSpecificCatch")
     private static void StepByStep(String asFile, String memFile) {
         Scanner scn = new Scanner(System.in);
-        int linesToSkip = 0;
-        String benchmarkName = getBenchmarkName(asFile);
-        Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
-        String[] instructions = loadInstructions(asFile);
+        
+        try {
+            String program = Files.readString(Paths.get(asFile));
+            Processor processor = new Processor(program);
 
-        int totalInstructionsExecuted = 0;
-        int stepsRemaining = 1;
+            int totalInstructions = 0;
+            Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
 
-        while (PC < instructions.length){ // TODO: while file still has next line/There are still instructions to be executed
-            // Run through instruction
-            String currInstruction = instructions[PC];
+            while(!processor.isHalt) {
+                System.out.println("Current PC: " + processor.getPC());
+                System.out.println("Total instructions executed: " + totalInstructions);
+                System.out.println("Press enter to continue");
 
-            // Count the contents of all the registers mentioned in the RTL
-            // Print the total number of instructions executed so far
-            int total = 0;
-            for (int n: count.values()) total += n;
-            System.out.println("Total Number of Instructions Executed: " + total);
-
-            // Wait for user input before beginning next line
-            if (linesToSkip > 0)
-                try {
-                    linesToSkip = Integer.parseInt(scn.nextLine());
-                } catch(Exception e) {
-                    System.out.println("Please input a valid number. Skipping 0 for now");
-                }
-            else
-                linesToSkip--;
-        }
-
-        // Write instruction count to a file called <benchmarkName>.instrCount
-        Path output = Paths.get(benchmarkName + ".instrCount");
-        // Display the number of times each instruction was executed to the user as well
-        System.out.println("The number of times instructions have been executed");
-        int total = 0;
-        for (Map.Entry<String, Integer> entry : count.entrySet()) {
-            String countInfo = entry.getKey() + ": " + entry.getValue();
-            total += entry.getValue();
-            System.out.println(countInfo);
-            try {
-                Files.writeString(output, countInfo);
-            } catch (IOException e) {
-                System.err.println("Could not write file: " + e.getMessage());
+                processor.executeInstructions();
+                totalInstructions++;
             }
-        }
-        // Write the total amount of instructions executed to the output file
-        try {
-            Files.writeString(output, total + "");
+
+            writeOutput(asFile, memFile, totalInstructions, count, processor);
+
         } catch (IOException e) {
-            System.err.println("Could not write file: " + e.getMessage());
+            System.err.println("Could not load program string: " + e);
         }
 
-        // Write the final contents of the memory to the appropriately named .out file <benchmarkName>.mem.out
-        Path source = Paths.get(memFile);
-        Path target = Paths.get(benchmarkName + ".mem.out");
-
-        try {
-            Files.copy(source, target);
-        } catch (IOException e) {
-            System.err.println("Copy failed: " + e.getMessage());
-        }
         scn.close();
     }
 
@@ -145,63 +106,73 @@ public class isaSim {
      * @param memFile memory File
      */
     private static void RunThrough(String asFile, String memFile) {
-        Scanner scn = new Scanner(System.in);
-        int linesToSkip = 0;
-        String benchmarkName = getBenchmarkName(asFile);
-        Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
-        while (linesToSkip > 1){ // TODO: while file still has next line/There are still instructions to be executed
-        
-        }
+        try {
+            String program = Files.readString(Paths.get(asFile));
+            Processor processor = new Processor(program);
 
-        // Write instruction count to a file called <benchmarkName>.instrCount
-        Path output = Paths.get(benchmarkName + ".instrCount");
-        // Display the number of times each instruction was executed to the user as well
-        System.out.println("The number of times instructions have been executed");
-        int total = 0;
-        for (Map.Entry<String, Integer> entry : count.entrySet()) {
-            String countInfo = entry.getKey() + ": " + entry.getValue();
-            total += entry.getValue();
-            System.out.println(countInfo);
-            try {
-                Files.writeString(output, countInfo);
-            } catch (IOException e) {
-                System.err.println("Could not write file: " + e.getMessage());
+            int totalInstructions = 0;
+            Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
+
+            while(!processor.isHalt) {
+                processor.executeInstructions();
+                totalInstructions++;
             }
-        }
-        // Write the total amount of instructions executed to the output file
-        try {
-            Files.writeString(output, total + "");
-        } catch (IOException e) {
-            System.err.println("Could not write file: " + e.getMessage());
-        }
 
-        // Write the final contents of the memory to the appropriately named .out file <benchmarkName>.mem.out
-        Path source = Paths.get(memFile);
-        Path target = Paths.get(benchmarkName + ".mem.out");
+            writeOutput(asFile, memFile, totalInstructions, count, processor);
 
-        try {
-            Files.copy(source, target);
         } catch (IOException e) {
-            System.err.println("Copy failed: " + e.getMessage());
-        } 
-        scn.close();
+            System.err.println("Could not load program string: " + e);
+        }
     }
 
     /**
-     * Private helper method to read instructions from a given
-     * assembly file 
+     * Private helper method that writes all relevant data
+     * to its corresponding output file
      * 
      * @param asFile assembly file
-     * @return String array of all instructions in file
+     * @param memFile memory file
+     * @param instructCount number of executed instructions
+     * @param count frequency of executed instructions
+     * @param processor processor for ISA
      */
-    private static String[] loadInstructions(String asFile) {
-        String[] error = new String[0];
-        try {
-            String instruction = Files.readString(Paths.get(asFile));
-            return instruction.split("\\n");
+    private static void writeOutput(String asFile, String memFile, int instructCount, Map<String, Integer> count, Processor processor) {
+        String benchmarkName = getBenchmarkName(asFile);
+        Byte[][] mem = processor.getMemory();
+        // Write instruction count to a file called <benchmarkName>.instrCount
+        String output = benchmarkName + ".instrCount";
+        // Write memory output to a file named <benchmarkName>.mem.out
+        String memOutput = benchmarkName + ".mem.out";
+
+        // Write the total amount of instructions executed to the output file
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(output))) {
+            for (Map.Entry<String, Integer> entry : count.entrySet()) {
+                bw.write(entry.getKey() + " : " + entry.getValue());
+                bw.newLine();
+            }
+
+            bw.write("Total instructions executed: " + instructCount);
+            bw.newLine();
         } catch (IOException e) {
-            System.err.println("Could not load instructions from assembly file: " + e.getMessage());
-            return error; 
+            System.err.println("Could not write instruction count to file: " + e.getMessage());
+        }
+
+        // Write the final contents of the memory to the output file
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(memOutput))) {
+            for (Byte[] row : mem) {
+                int byte1 = row[0]; // may need to be adjusted to account for null memory slots
+                int byte2 = row[1];
+
+                String hex1 = Integer.toHexString(byte1);
+                String hex2 = Integer.toHexString(byte2);
+
+                bw.write(hex1 + hex2);
+                bw.newLine();
+            }
+
+            bw.write("Total instructions executed: " + instructCount);
+            bw.newLine();
+        } catch (IOException e) {
+            System.err.println("Could not write memory to file: " + e.getMessage());
         }
     }
 

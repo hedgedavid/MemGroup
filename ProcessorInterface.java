@@ -8,6 +8,12 @@ public interface ProcessorInterface {
     public int getPC();
 
     /**
+     * Return current saved data in memory
+     * @return memory
+     */
+    public Byte[][] getMemory();
+
+    /**
      * 
      * execute current instructions at address PC.
      * Afterward, increment PC by 2 to next instruction 
