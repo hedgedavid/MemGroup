@@ -23,6 +23,11 @@ public class Processor implements ProcessorInterface{
     public Processor(){
         this.PC = 0;
         this.register = new Byte[NUMBER_OF_REG][2];
+        for(int i = 0; i < NUMBER_OF_REG; i++){
+            this.register[i][0] = 0;
+            this.register[i][1] = 0;
+        }
+        
         memory = null; //since program hasn't been added, there's no way determining the size
     }
 
@@ -39,13 +44,25 @@ public class Processor implements ProcessorInterface{
         return this.PC;
     }
 
+    public boolean getIsHalt(){
+        return this.isHalt;
+    }
+
 
 
 
     @Override
     public void executeInstructions() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'executeInstructions'");
+        Byte[] instruction = new Byte[2];
+        instruction[0] = memory[PC];
+        instruction[1] = memory[PC + 1];
+
+        if(!isHalt){
+            
+            phaseInstruction(instruction);
+            PC += 2;
+        }
+        
     }
 
 
@@ -53,7 +70,7 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void phaseInstruction(Byte[] instruction) {
-        Byte sample = (byte)(instruction[0] >> 4);
+        Byte sample = (byte)((instruction[0] & 0xF0) >> 4);
 
         Byte[] register1 = register[instruction[0] & 0x0F];
         Byte[] register2 = register[(instruction[1] & 0xF0) >> 4];
@@ -111,6 +128,8 @@ public class Processor implements ProcessorInterface{
                 break;
                 
         }
+        
+        
     }
 
 
@@ -309,8 +328,9 @@ public class Processor implements ProcessorInterface{
 
         for(int i = 0; i < lineCount; i++){
             temp = list.get(i);
-            memory[i] = (byte)((phaseHexChartoBinary(temp.charAt(0)) << 4) + phaseHexChartoBinary(temp.charAt(1)));
-            memory[i + 1] = (byte)((phaseHexChartoBinary(temp.charAt(2)) << 4) + phaseHexChartoBinary(temp.charAt(3)));
+             int index = i * 2;
+            memory[index] = (byte)(((phaseHexChartoBinary(temp.charAt(0)) << 4) + phaseHexChartoBinary(temp.charAt(1))));
+            memory[index + 1] = (byte)((phaseHexChartoBinary(temp.charAt(2)) << 4) + phaseHexChartoBinary(temp.charAt(3)));
         }
     }
 
