@@ -1,9 +1,11 @@
-import java.lang.reflect.Array;
 import java.security.InvalidParameterException;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+/**
+ * Processor for the ISA
+ * 
+ * @author David Hedge, Dakotah Williams, Dedi Seme, Haylee Staub
+ */
 public class Processor implements ProcessorInterface{
 
     final int NUMBER_OF_REG = 16;
@@ -14,12 +16,11 @@ public class Processor implements ProcessorInterface{
 
     private Byte[] memory;
 
-    boolean isHalt; // if ture the program will not run another instruction till it reset
+    boolean isHalt; // if true the program will not run another instruction till it reset
     
-
-    
-
-
+    /**
+     * Constructor for a new ISA Processor
+     */
     public Processor(){
         this.PC = 0;
         this.register = new Byte[NUMBER_OF_REG][2];
@@ -31,14 +32,15 @@ public class Processor implements ProcessorInterface{
         memory = null; //since program hasn't been added, there's no way determining the size
     }
 
+    /**
+     * Constructor for a new ISA Processor that takes in a program string
+     * 
+     * @param program String representation of an assembly program
+     */
     public Processor(String program){
         this();
         loadProgram(program); //use the program string to load the program into the memory 
     }
-        
-
-
-
 
     public int getPC(){
         return this.PC;
@@ -47,9 +49,6 @@ public class Processor implements ProcessorInterface{
     public boolean getIsHalt(){
         return this.isHalt;
     }
-
-
-
 
     @Override
     public void executeInstructions() {
@@ -64,9 +63,11 @@ public class Processor implements ProcessorInterface{
         }
         
     }
+        Byte[] instruction = memory[PC];
 
-
-
+        PC++;
+        phaseInstruction(instruction);
+    }
 
     @Override
     public void phaseInstruction(Byte[] instruction) {
@@ -132,9 +133,6 @@ public class Processor implements ProcessorInterface{
         
     }
 
-
-
-
     @Override
     public void ADD(Byte[] register1, Byte[] register2, Byte[] register3) {
         int num1 = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
@@ -144,9 +142,6 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)(result & 0xFF);
     }
 
-
-
-
     @Override
     public void MUL(Byte[] register1, Byte[] register2, Byte[] register3) {
         int num1 = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
@@ -155,9 +150,6 @@ public class Processor implements ProcessorInterface{
         register3[0] = (byte)((result & 0xFF00) >> 8);
         register3[1] = (byte)(result & 0xFF);
     }
-
-
-
 
     @Override
     public void ADDF(Byte[] register1, Byte[] register2, Byte[] register3) {
@@ -171,9 +163,6 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)(halfFloat & 0xFF);
     }
 
-
-
-
     @Override
     public void MULF(Byte[] register1, Byte[] register2, Byte[] register3) {
         float num1 = Float.float16ToFloat((short)(((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF)));
@@ -186,17 +175,11 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)(halfFloat & 0xFF);
     }
 
-
-
-
     @Override
     public void LOADI(Byte[] register1, int IAddress) {
         register1[0] = memory[IAddress];
         register1[0] = memory[IAddress + 1];
     }
-
-
-
 
     @Override
     public void LOAD(Byte[] register1, Byte[] register2) {
@@ -205,9 +188,6 @@ public class Processor implements ProcessorInterface{
         register1[1] = memory[iAddress + 1];
     }
 
-
-
-
     @Override
     public void STORE(Byte[] register1, Byte[] register2) {
         int iAddress = (int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF));
@@ -215,16 +195,10 @@ public class Processor implements ProcessorInterface{
         memory[ iAddress + 1] = register1[1];
     }
 
-
-
-
     @Override
     public void JMP(Byte[] register1) {
         PC = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
     }
-
-
-
 
     @Override
     public void JMPL(Byte[] register1, Byte[] register2) {
@@ -235,9 +209,6 @@ public class Processor implements ProcessorInterface{
         }
     }
 
-
-
-
     @Override
     public void JMPE(Byte[] register1, Byte[] register2) {
         short num = (short)((register2[0] << 8) | register2[1]);
@@ -246,17 +217,11 @@ public class Processor implements ProcessorInterface{
         }
     }
 
-
-
-
     @Override
     public void AND(Byte[] register1, Byte[] register2, Byte[] register3) {
         register3[0] = (byte)(register1[0] & register2[0]);
         register3[1] = (byte)(register1[1] & register2[1]);
     }
-
-
-
 
     @Override
     public void OR(Byte[] register1, Byte[] register2, Byte[] register3) {
@@ -264,17 +229,11 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)(register1[1] | register2[1]);
     }
 
-
-
-
     @Override
     public void NOT(Byte[] register1, Byte[] register2) {
         register1[0] = (byte)~register2[0];
         register1[1] = (byte)~register2[1];
     }
-
-
-
 
     @Override
     public void LSL(Byte[] register1, Byte[] register2, Byte[] register3) {
@@ -286,9 +245,6 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)((num3 & 0x00FF));
     }
 
-
-
-
     @Override
     public void LSR(Byte[] register1, Byte[] register2, Byte[] register3) {
         short num1 = (short)((register1[0] << 8) | register1[1]);
@@ -299,24 +255,13 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)((num3 & 0x00FF));
     }
 
-
-
-
     @Override
     public void HALT() {
         isHalt = true;
     }
 
-
     @Override
     public void loadProgram(String program) {
-
-        
-
-
-        
-        
-
         List<String> list = program.lines().toList();
 
         int lineCount = list.size();
@@ -334,7 +279,6 @@ public class Processor implements ProcessorInterface{
         }
     }
 
-
     public static Byte phaseHexChartoBinary(char character){
         if(Character.isDigit(character)){
             return (byte) ((int)character - (int)'0');
@@ -343,16 +287,5 @@ public class Processor implements ProcessorInterface{
         } else{
             throw new InvalidParameterException();
         }
-        
-        
-        
     }
-
-
-    
-
-
-
-    
-        
 }
