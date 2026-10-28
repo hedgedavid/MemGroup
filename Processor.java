@@ -42,6 +42,7 @@ public class Processor implements ProcessorInterface{
         loadProgram(program); //use the program string to load the program into the memory 
     }
 
+    @Override 
     public int getPC(){
         return this.PC;
     }
@@ -50,7 +51,8 @@ public class Processor implements ProcessorInterface{
         return this.isHalt;
     }
 
-    @Override
+    
+    @Override 
     public void executeInstructions() {
         Byte[] instruction = new Byte[2];
         instruction[0] = memory[PC];
@@ -61,15 +63,16 @@ public class Processor implements ProcessorInterface{
             phaseInstruction(instruction);
             PC += 2;
         }
-        
-    }
-        Byte[] instruction = memory[PC];
+
+        // Do we need this? Instruction is a Byte array and cannot be converted to a Byte anyway
+        // instruction = memory[PC];
 
         PC++;
         phaseInstruction(instruction);
     }
 
-    @Override
+
+    @Override     
     public void phaseInstruction(Byte[] instruction) {
         Byte sample = (byte)((instruction[0] & 0xF0) >> 4);
 
@@ -133,7 +136,7 @@ public class Processor implements ProcessorInterface{
         
     }
 
-    @Override
+    @Override 
     public void ADD(Byte[] register1, Byte[] register2, Byte[] register3) {
         int num1 = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
         int num2 = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
@@ -142,7 +145,8 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)(result & 0xFF);
     }
 
-    @Override
+    
+    @Override 
     public void MUL(Byte[] register1, Byte[] register2, Byte[] register3) {
         int num1 = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
         int num2 = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
@@ -151,7 +155,8 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)(result & 0xFF);
     }
 
-    @Override
+    
+    @Override 
     public void ADDF(Byte[] register1, Byte[] register2, Byte[] register3) {
         float num1 = Float.float16ToFloat((short)(((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF)));
         float num2 = Float.float16ToFloat((short)(((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF)));
@@ -163,7 +168,8 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)(halfFloat & 0xFF);
     }
 
-    @Override
+    
+    @Override 
     public void MULF(Byte[] register1, Byte[] register2, Byte[] register3) {
         float num1 = Float.float16ToFloat((short)(((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF)));
         float num2 = Float.float16ToFloat((short)(((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF)));
@@ -175,32 +181,37 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)(halfFloat & 0xFF);
     }
 
-    @Override
+    
+    @Override 
     public void LOADI(Byte[] register1, int IAddress) {
         register1[0] = memory[IAddress];
         register1[0] = memory[IAddress + 1];
     }
 
-    @Override
+    
+    @Override 
     public void LOAD(Byte[] register1, Byte[] register2) {
         int iAddress = (int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF));
         register1[0] = memory[iAddress];
         register1[1] = memory[iAddress + 1];
     }
 
-    @Override
+    
+    @Override 
     public void STORE(Byte[] register1, Byte[] register2) {
         int iAddress = (int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF));
         memory[ iAddress] = register1[0];
         memory[ iAddress + 1] = register1[1];
     }
 
-    @Override
+    
+    @Override 
     public void JMP(Byte[] register1) {
         PC = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
     }
 
-    @Override
+    
+    @Override 
     public void JMPL(Byte[] register1, Byte[] register2) {
 
         short num = (short)((register2[0] << 8) | register2[1]);
@@ -209,7 +220,8 @@ public class Processor implements ProcessorInterface{
         }
     }
 
-    @Override
+    
+    @Override 
     public void JMPE(Byte[] register1, Byte[] register2) {
         short num = (short)((register2[0] << 8) | register2[1]);
         if(num == 0){
@@ -217,25 +229,29 @@ public class Processor implements ProcessorInterface{
         }
     }
 
-    @Override
+    
+    @Override 
     public void AND(Byte[] register1, Byte[] register2, Byte[] register3) {
         register3[0] = (byte)(register1[0] & register2[0]);
         register3[1] = (byte)(register1[1] & register2[1]);
     }
 
-    @Override
+    
+    @Override 
     public void OR(Byte[] register1, Byte[] register2, Byte[] register3) {
         register3[0] = (byte)(register1[0] | register2[0]);
         register3[1] = (byte)(register1[1] | register2[1]);
     }
 
-    @Override
+    
+    @Override 
     public void NOT(Byte[] register1, Byte[] register2) {
         register1[0] = (byte)~register2[0];
         register1[1] = (byte)~register2[1];
     }
 
-    @Override
+    
+    @Override 
     public void LSL(Byte[] register1, Byte[] register2, Byte[] register3) {
         short num1 = (short)((register1[0] << 8) | register1[1]);
         short num2 = (short)((register2[0] << 8) | register2[1]);
@@ -245,7 +261,8 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)((num3 & 0x00FF));
     }
 
-    @Override
+    
+    @Override 
     public void LSR(Byte[] register1, Byte[] register2, Byte[] register3) {
         short num1 = (short)((register1[0] << 8) | register1[1]);
         short num2 = (short)((register2[0] << 8) | register2[1]);
@@ -255,12 +272,13 @@ public class Processor implements ProcessorInterface{
         register3[1] = (byte)((num3 & 0x00FF));
     }
 
-    @Override
+    
+    @Override 
     public void HALT() {
         isHalt = true;
     }
 
-    @Override
+    @Override 
     public void loadProgram(String program) {
         List<String> list = program.lines().toList();
 
@@ -287,5 +305,11 @@ public class Processor implements ProcessorInterface{
         } else{
             throw new InvalidParameterException();
         }
+    }
+
+    @Override
+    public Byte[][] getMemory() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getMemory'");
     }
 }
