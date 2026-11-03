@@ -79,8 +79,7 @@ public class Processor implements ProcessorInterface{
         // Do we need this? Instruction is a Byte array and cannot be converted to a Byte anyway
         // instruction = memory[PC];
 
-        PC++;
-        phaseInstruction(instruction);
+        
     }
 
 
