@@ -56,11 +56,23 @@ public class Processor implements ProcessorInterface{
         Byte[] instruction = new Byte[2];
         instruction[0] = memory[PC];
         instruction[1] = memory[PC + 1];
+        
+        
+
+        int prevPC = PC;
 
         if(!isHalt){
             
             phaseInstruction(instruction);
-            PC += 2;
+
+            if(prevPC - PC == 0){
+                PC += 2;
+            }
+
+            
+
+            
+        
         }
         
     }
@@ -90,7 +102,7 @@ public class Processor implements ProcessorInterface{
                 MULF(register1, register2, register3);
                 break;
             case 0x04:
-                int IAddress = (int)(((instruction[0] & 0x0F) << 8) | (instruction[1] & 0xFF));
+                int IAddress = (int) (instruction[1] & 0xFF); 
                 LOADI(register1, IAddress);
                 break;
             case 0x05:
@@ -137,11 +149,11 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void ADD(Byte[] register1, Byte[] register2, Byte[] register3) {
-        int num1 = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
         int num2 = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
-        int result = num1 + num2;
-        register3[0] = (byte)((result & 0xFF00) >> 8);
-        register3[1] = (byte)(result & 0xFF);
+        int num3 = ((register3[0] & 0xFF) << 8) | (register3[1] & 0xFF);
+        int result = num2 + num3;
+        register1[0] = (byte)((result & 0xFF00) >> 8);
+        register1[1] = (byte)(result & 0xFF);
     }
 
 
@@ -149,11 +161,11 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void MUL(Byte[] register1, Byte[] register2, Byte[] register3) {
-        int num1 = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
         int num2 = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
-        int result = num1 * num2;
-        register3[0] = (byte)((result & 0xFF00) >> 8);
-        register3[1] = (byte)(result & 0xFF);
+        int num3 = ((register3[0] & 0xFF) << 8) | (register3[1] & 0xFF);
+        int result = num2 * num3;
+        register1[0] = (byte)((result & 0xFF00) >> 8);
+        register1[1] = (byte)(result & 0xFF);
     }
 
 
@@ -161,14 +173,14 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void ADDF(Byte[] register1, Byte[] register2, Byte[] register3) {
-        float num1 = Float.float16ToFloat((short)(((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF)));
         float num2 = Float.float16ToFloat((short)(((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF)));
+        float num3 = Float.float16ToFloat((short)(((register3[0] & 0xFF) << 8) | (register3[1] & 0xFF)));
 
-        float result = num1 + num2;
+        float result = num2 + num3;
         short halfFloat = Float.floatToFloat16(result);
 
-        register3[0] = (byte)((halfFloat & 0xFF00) >> 8);
-        register3[1] = (byte)(halfFloat & 0xFF);
+        register1[0] = (byte)((halfFloat & 0xFF00) >> 8);
+        register1[1] = (byte)(halfFloat & 0xFF);
     }
 
 
@@ -176,14 +188,14 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void MULF(Byte[] register1, Byte[] register2, Byte[] register3) {
-        float num1 = Float.float16ToFloat((short)(((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF)));
         float num2 = Float.float16ToFloat((short)(((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF)));
+        float num3 = Float.float16ToFloat((short)(((register3[0] & 0xFF) << 8) | (register3[1] & 0xFF)));
 
-        float result = num1 * num2;
+        float result = num2 * num3;
         short halfFloat = Float.floatToFloat16(result);
 
-        register3[0] = (byte)((halfFloat & 0xFF00) >> 8);
-        register3[1] = (byte)(halfFloat & 0xFF);
+        register1[0] = (byte)((halfFloat & 0xFF00) >> 8);
+        register1[1] = (byte)(halfFloat & 0xFF);
     }
 
 
@@ -192,7 +204,7 @@ public class Processor implements ProcessorInterface{
     @Override
     public void LOADI(Byte[] register1, int IAddress) {
         register1[0] = memory[IAddress];
-        register1[0] = memory[IAddress + 1];
+        register1[1] = memory[IAddress + 1];
     }
 
 
@@ -229,9 +241,9 @@ public class Processor implements ProcessorInterface{
     @Override
     public void JMPL(Byte[] register1, Byte[] register2) {
 
-        short num = (short)((register2[0] << 8) | register2[1]);
+        short num = (short)((register1[0] << 8) | register1[1]);
         if(num < 0){
-            PC = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
+            PC = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
         }
     }
 
@@ -240,9 +252,9 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void JMPE(Byte[] register1, Byte[] register2) {
-        short num = (short)((register2[0] << 8) | register2[1]);
+        short num = (short)((register1[0] << 8) | register1[1]);
         if(num == 0){
-            PC = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
+            PC = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
         }
     }
 
@@ -251,8 +263,8 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void AND(Byte[] register1, Byte[] register2, Byte[] register3) {
-        register3[0] = (byte)(register1[0] & register2[0]);
-        register3[1] = (byte)(register1[1] & register2[1]);
+        register1[0] = (byte)(register2[0] & register3[0]);
+        register1[1] = (byte)(register2[1] & register3[1]);
     }
 
 
@@ -260,8 +272,8 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void OR(Byte[] register1, Byte[] register2, Byte[] register3) {
-        register3[0] = (byte)(register1[0] | register2[0]);
-        register3[1] = (byte)(register1[1] | register2[1]);
+        register1[0] = (byte)(register2[0] | register3[0]);
+        register1[1] = (byte)(register2[1] | register3[1]);
     }
 
 
@@ -278,12 +290,12 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void LSL(Byte[] register1, Byte[] register2, Byte[] register3) {
-        short num1 = (short)((register1[0] << 8) | register1[1]);
         short num2 = (short)((register2[0] << 8) | register2[1]);
-        short num3 = (short)(num1 << num2);
+        short num3 = (short)((register3[0] << 8) | register3[1]);
+        short num1 = (short)(num2 << num3);
 
-        register3[0] = (byte)((num3 & 0xFF00) << 8);
-        register3[1] = (byte)((num3 & 0x00FF));
+        register1[0] = (byte)((num1 & 0xFF00) << 8);
+        register1[1] = (byte)((num1 & 0x00FF));
     }
 
 
@@ -291,12 +303,12 @@ public class Processor implements ProcessorInterface{
 
     @Override
     public void LSR(Byte[] register1, Byte[] register2, Byte[] register3) {
-        short num1 = (short)((register1[0] << 8) | register1[1]);
         short num2 = (short)((register2[0] << 8) | register2[1]);
-        short num3 = (short)(num1 >> num2);
+        short num3 = (short)((register3[0] << 8) | register3[1]);
+        short num1 = (short)(num2 >> num3);
 
-        register3[0] = (byte)((num3 & 0xFF00) << 8);
-        register3[1] = (byte)((num3 & 0x00FF));
+        register1[0] = (byte)((num1 & 0xFF00) << 8);
+        register1[1] = (byte)((num1 & 0x00FF));
     }
 
 
@@ -321,18 +333,16 @@ public class Processor implements ProcessorInterface{
 
         int lineCount = list.size();
 
-        memory = new Byte[lineCount * 2];
+        memory = new Byte[lineCount];
         
 
         String temp = null;
 
-        for(int i = 0; i < lineCount; i++){
+        for(int i = 0; i < lineCount; i++){ 
             temp = list.get(i);
-             int index = i * 2;
-            memory[index] = (byte)(((phaseHexChartoBinary(temp.charAt(0)) << 4) + phaseHexChartoBinary(temp.charAt(1))));
-            memory[index + 1] = (byte)((phaseHexChartoBinary(temp.charAt(2)) << 4) + phaseHexChartoBinary(temp.charAt(3)));
-        }
-    }
+            memory[i] = (byte)(((phaseHexChartoBinary(temp.charAt(0)) << 4) + phaseHexChartoBinary(temp.charAt(1))));
+        } 
+    } 
 
 
     public static Byte phaseHexChartoBinary(char character){
@@ -347,6 +357,25 @@ public class Processor implements ProcessorInterface{
         
         
     }
+
+
+    public String toString(){
+        StringBuilder strBuild = new StringBuilder();
+        for(int i = 0; i < memory.length; i++){
+            strBuild.append(String.format("%02x", memory[i]).toUpperCase()  + "\n");
+        }
+        return strBuild.toString();
+    }
+
+    public String toStringHex(){
+        StringBuilder strBuild = new StringBuilder();
+        for(int i = 0; i < memory.length; i++){
+            strBuild.append((String.format("%04x,", i) +  String.format("%02x ", memory[i])).toUpperCase() + "\n");
+        }
+        return strBuild.toString();
+    }
+
+    
 
 
     
