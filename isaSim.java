@@ -1,5 +1,7 @@
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,9 +19,10 @@ import java.util.Scanner;
 public class isaSim {
     public static void main(String[] args) {
         // Check if the input is correct
-        if (args.length != 3){
+        if (args.length != 2){
             System.out.println("Incorrect number of arguments entered in the command line.");
-            System.out.println("Needs to be in format \" $ isaSim <r|s> <assembly file> <memory file>\"");
+            System.out.println("Needs to be in format \" $ isaSim -<r|s> <assembly file> <memory file>\"");
+            System.out.println("or: \" $ isaSim -<r|s> <assembly and memory file (same file)>\"");
             System.exit(1);
         }
         if (!args[0].equals("-r") && !args[0].equals("-s")){
@@ -29,14 +32,26 @@ public class isaSim {
         }
 
         // Check if the provided files are accurate
-        if (!CheckFilePath(args[1]) || !CheckFilePath(args[2])) System.exit(1);
+        if (args.length > 2){
+            if (!CheckFilePath(args[1]) || !CheckFilePath(args[2])) System.exit(1);
+        } else {
+            if(!CheckFilePath(args[1])) System.exit(1);
+        }
 
 
         // Run Through or Step by Step
-        if (args[0].equals("-s")) {
-            StepByStep(args[1], args[2]);
+        if (args.length > 2){
+            if (args[0].equals("-s")) {
+                StepByStep(args[1], args[2]);
+            } else {
+                RunThrough(args[1], args[2]);
+            }
         } else {
-            RunThrough(args[1], args[2]);
+            if (args[0].equals("-s")) {
+                StepByStepC(args[1]);
+            } else {
+                RunThroughC(args[1]);
+            }
         }
     }
 
@@ -87,7 +102,7 @@ public class isaSim {
                 totalInstructions++;
             }
 
-            writeOutput(asFile, memFile, totalInstructions, count, processor);
+            writeOutput(asFile, totalInstructions, count, processor);
 
         } catch (IOException e) {
             System.err.println("Could not load program string: " + e);
@@ -95,6 +110,36 @@ public class isaSim {
 
         scn.close();
     }
+
+
+    private static void StepByStepC(String file) {
+        Scanner scn = new Scanner(System.in);
+        
+        try {
+            String program = Files.readString(Paths.get(file));
+            Processor processor = new Processor(asParser(program));
+
+            int totalInstructions = 0;
+            Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
+
+            while(!processor.isHalt) {
+                System.out.println("Current PC: " + processor.getPC());
+                System.out.println("Total instructions executed: " + totalInstructions);
+                System.out.println("Press enter to continue");
+
+                processor.executeInstructions();
+                totalInstructions++;
+            }
+
+            writeOutput(file, totalInstructions, count, processor);
+
+        } catch (IOException e) {
+            System.err.println("Could not load program string: " + e);
+        }
+
+        scn.close();
+    }
+
 
     /**
      * Run Through function for the isa benchmark
@@ -118,12 +163,34 @@ public class isaSim {
                 totalInstructions++;
             }
 
-            writeOutput(asFile, memFile, totalInstructions, count, processor);
+            writeOutput(asFile, totalInstructions, count, processor);
 
         } catch (IOException e) {
             System.err.println("Could not load program string: " + e);
         }
     }
+
+
+    private static void RunThroughC(String file) {
+        try {
+            String program = Files.readString((Paths.get(file)));
+            Processor processor = new Processor(asParser(program));
+
+            int totalInstructions = 0;
+            Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
+
+            while(!processor.isHalt) {
+                processor.executeInstructions();
+                totalInstructions++;
+            }
+
+            writeOutput(file, totalInstructions, count, processor);
+
+        } catch (IOException e) {
+            System.err.println("Could not load program string: " + e);
+        }
+    }
+
 
     /**
      * Private helper method that writes all relevant data
@@ -135,7 +202,7 @@ public class isaSim {
      * @param count frequency of executed instructions
      * @param processor processor for ISA
      */
-    private static void writeOutput(String asFile, String memFile, int instructCount, Map<String, Integer> count, Processor processor) {
+    private static void writeOutput(String asFile, int instructCount, Map<String, Integer> count, Processor processor) {
         String benchmarkName = getBenchmarkName(asFile);
         Byte[][] mem = processor.getMemory();
         // Write instruction count to a file called <benchmarkName>.instrCount
@@ -176,6 +243,47 @@ public class isaSim {
         }
     }
 
+    // private static void writeOutputC(int instructCount, Map<String, Integer> count, Processor processor) {
+    //     String benchmarkName = getBenchmarkName(asFile);
+    //     Byte[][] mem = processor.getMemory();
+    //     // Write instruction count to a file called <benchmarkName>.instrCount
+    //     String output = benchmarkName + ".instrCount";
+    //     // Write memory output to a file named <benchmarkName>.mem.out
+    //     String memOutput = benchmarkName + ".mem.out";
+
+    //     // Write the total amount of instructions executed to the output file
+    //     try (BufferedWriter bw = new BufferedWriter(new FileWriter(output))) {
+    //         for (Map.Entry<String, Integer> entry : count.entrySet()) {
+    //             bw.write(entry.getKey() + " : " + entry.getValue());
+    //             bw.newLine();
+    //         }
+
+    //         bw.write("Total instructions executed: " + instructCount);
+    //         bw.newLine();
+    //     } catch (IOException e) {
+    //         System.err.println("Could not write instruction count to file: " + e.getMessage());
+    //     }
+
+    //     // Write the final contents of the memory to the output file
+    //     try (BufferedWriter bw = new BufferedWriter(new FileWriter(memOutput))) {
+    //         for (Byte[] row : mem) {
+    //             int byte1 = row[0]; // may need to be adjusted to account for null memory slots
+    //             int byte2 = row[1];
+
+    //             String hex1 = Integer.toHexString(byte1);
+    //             String hex2 = Integer.toHexString(byte2);
+
+    //             bw.write(hex1 + hex2);
+    //             bw.newLine();
+    //         }
+
+    //         bw.write("Total instructions executed: " + instructCount);
+    //         bw.newLine();
+    //     } catch (IOException e) {
+    //         System.err.println("Could not write memory to file: " + e.getMessage());
+    //     }
+    // }
+
     /**
      * Private method to extract a given benchmark's file name
      * from the provided file path
@@ -186,5 +294,28 @@ public class isaSim {
     private static String getBenchmarkName(String asFile) {
         String fileName = Paths.get(asFile).getFileName().toString();
         return fileName.split("\\.")[0];
+    }
+
+    private static String asParser(String fileName) {
+        String program = null; 
+
+        StringBuilder strBuild = new StringBuilder();
+        FileReader fileReader = null;
+        BufferedReader bufRead = null;
+        try {
+            fileReader = new FileReader(fileName);
+            bufRead = new BufferedReader(fileReader);
+            String line;
+            bufRead.readLine();
+            bufRead.readLine();
+            while((line = bufRead.readLine()) != null){
+            strBuild.append(line.substring(5) + "\n");
+            }
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return program;
     }
 }
