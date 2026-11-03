@@ -1,9 +1,11 @@
-import java.lang.reflect.Array;
 import java.security.InvalidParameterException;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+/**
+ * Processor for the ISA
+ * 
+ * @author David Hedge, Dakotah Williams, Dedi Seme, Haylee Staub
+ */
 public class Processor implements ProcessorInterface{
 
     final int NUMBER_OF_REG = 16;
@@ -14,12 +16,11 @@ public class Processor implements ProcessorInterface{
 
     private Byte[] memory;
 
-    boolean isHalt; // if ture the program will not run another instruction till it reset
+    boolean isHalt; // if true the program will not run another instruction till it reset
     
-
-    
-
-
+    /**
+     * Constructor for a new ISA Processor
+     */
     public Processor(){
         this.PC = 0;
         this.register = new Byte[NUMBER_OF_REG][2];
@@ -31,15 +32,17 @@ public class Processor implements ProcessorInterface{
         memory = null; //since program hasn't been added, there's no way determining the size
     }
 
+    /**
+     * Constructor for a new ISA Processor that takes in a program string
+     * 
+     * @param program String representation of an assembly program
+     */
     public Processor(String program){
         this();
         loadProgram(program); //use the program string to load the program into the memory 
     }
-        
 
-
-
-
+    @Override 
     public int getPC(){
         return this.PC;
     }
@@ -48,10 +51,8 @@ public class Processor implements ProcessorInterface{
         return this.isHalt;
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void executeInstructions() {
         Byte[] instruction = new Byte[2];
         instruction[0] = memory[PC];
@@ -74,13 +75,16 @@ public class Processor implements ProcessorInterface{
             
         
         }
-        
+
+        // Do we need this? Instruction is a Byte array and cannot be converted to a Byte anyway
+        // instruction = memory[PC];
+
+        PC++;
+        phaseInstruction(instruction);
     }
 
 
-
-
-    @Override
+    @Override     
     public void phaseInstruction(Byte[] instruction) {
         Byte sample = (byte)((instruction[0] & 0xF0) >> 4);
 
@@ -144,10 +148,7 @@ public class Processor implements ProcessorInterface{
         
     }
 
-
-
-
-    @Override
+    @Override 
     public void ADD(Byte[] register1, Byte[] register2, Byte[] register3) {
         int num2 = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
         int num3 = ((register3[0] & 0xFF) << 8) | (register3[1] & 0xFF);
@@ -156,10 +157,8 @@ public class Processor implements ProcessorInterface{
         register1[1] = (byte)(result & 0xFF);
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void MUL(Byte[] register1, Byte[] register2, Byte[] register3) {
         int num2 = ((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF);
         int num3 = ((register3[0] & 0xFF) << 8) | (register3[1] & 0xFF);
@@ -168,10 +167,8 @@ public class Processor implements ProcessorInterface{
         register1[1] = (byte)(result & 0xFF);
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void ADDF(Byte[] register1, Byte[] register2, Byte[] register3) {
         float num2 = Float.float16ToFloat((short)(((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF)));
         float num3 = Float.float16ToFloat((short)(((register3[0] & 0xFF) << 8) | (register3[1] & 0xFF)));
@@ -183,10 +180,8 @@ public class Processor implements ProcessorInterface{
         register1[1] = (byte)(halfFloat & 0xFF);
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void MULF(Byte[] register1, Byte[] register2, Byte[] register3) {
         float num2 = Float.float16ToFloat((short)(((register2[0] & 0xFF) << 8) | (register2[1] & 0xFF)));
         float num3 = Float.float16ToFloat((short)(((register3[0] & 0xFF) << 8) | (register3[1] & 0xFF)));
@@ -198,47 +193,37 @@ public class Processor implements ProcessorInterface{
         register1[1] = (byte)(halfFloat & 0xFF);
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void LOADI(Byte[] register1, int IAddress) {
         register1[0] = memory[IAddress];
         register1[1] = memory[IAddress + 1];
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void LOAD(Byte[] register1, Byte[] register2) {
         int iAddress = (int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF));
         register1[0] = memory[iAddress];
         register1[1] = memory[iAddress + 1];
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void STORE(Byte[] register1, Byte[] register2) {
         int iAddress = (int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF));
         memory[ iAddress] = register1[0];
         memory[ iAddress + 1] = register1[1];
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void JMP(Byte[] register1) {
         PC = ((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF);
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void JMPL(Byte[] register1, Byte[] register2) {
 
         short num = (short)((register1[0] << 8) | register1[1]);
@@ -247,10 +232,8 @@ public class Processor implements ProcessorInterface{
         }
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void JMPE(Byte[] register1, Byte[] register2) {
         short num = (short)((register1[0] << 8) | register1[1]);
         if(num == 0){
@@ -258,37 +241,29 @@ public class Processor implements ProcessorInterface{
         }
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void AND(Byte[] register1, Byte[] register2, Byte[] register3) {
         register1[0] = (byte)(register2[0] & register3[0]);
         register1[1] = (byte)(register2[1] & register3[1]);
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void OR(Byte[] register1, Byte[] register2, Byte[] register3) {
         register1[0] = (byte)(register2[0] | register3[0]);
         register1[1] = (byte)(register2[1] | register3[1]);
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void NOT(Byte[] register1, Byte[] register2) {
         register1[0] = (byte)~register2[0];
         register1[1] = (byte)~register2[1];
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void LSL(Byte[] register1, Byte[] register2, Byte[] register3) {
         short num2 = (short)((register2[0] << 8) | register2[1]);
         short num3 = (short)((register3[0] << 8) | register3[1]);
@@ -298,10 +273,8 @@ public class Processor implements ProcessorInterface{
         register1[1] = (byte)((num1 & 0x00FF));
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void LSR(Byte[] register1, Byte[] register2, Byte[] register3) {
         short num2 = (short)((register2[0] << 8) | register2[1]);
         short num3 = (short)((register3[0] << 8) | register3[1]);
@@ -311,24 +284,14 @@ public class Processor implements ProcessorInterface{
         register1[1] = (byte)((num1 & 0x00FF));
     }
 
-
-
-
-    @Override
+    
+    @Override 
     public void HALT() {
         isHalt = true;
     }
 
-
-    @Override
+    @Override 
     public void loadProgram(String program) {
-
-        
-
-
-        
-        
-
         List<String> list = program.lines().toList();
 
         int lineCount = list.size();
@@ -353,29 +316,13 @@ public class Processor implements ProcessorInterface{
         } else{
             throw new InvalidParameterException();
         }
-        
-        
-        
     }
 
-
-    public String toString(){
-        StringBuilder strBuild = new StringBuilder();
-        for(int i = 0; i < memory.length; i++){
-            strBuild.append(String.format("%02x", memory[i]).toUpperCase()  + "\n");
-        }
-        return strBuild.toString();
+    @Override
+    public Byte[][] getMemory() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getMemory'");
     }
-
-    public String toStringHex(){
-        StringBuilder strBuild = new StringBuilder();
-        for(int i = 0; i < memory.length; i++){
-            strBuild.append((String.format("%04x,", i) +  String.format("%02x ", memory[i])).toUpperCase() + "\n");
-        }
-        return strBuild.toString();
-    }
-
-    
 
 
     
