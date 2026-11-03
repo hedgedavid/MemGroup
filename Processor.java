@@ -307,7 +307,6 @@ public class Processor implements ProcessorInterface{
         } 
     } 
 
-
     public static Byte phaseHexChartoBinary(char character){
         if(Character.isDigit(character)){
             return (byte) ((int)character - (int)'0');
@@ -318,11 +317,24 @@ public class Processor implements ProcessorInterface{
         }
     }
 
-    @Override
-    public Byte[][] getMemory() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getMemory'");
+
+    public String toString(){
+        StringBuilder strBuild = new StringBuilder();
+        for(int i = 0; i < memory.length; i++){
+            strBuild.append(String.format("%02x", memory[i]).toUpperCase()  + "\n");
+        }
+        return strBuild.toString();
     }
+
+    public String toStringHex(){
+        StringBuilder strBuild = new StringBuilder();
+        for(int i = 0; i < memory.length; i++){
+            strBuild.append((String.format("%04x,", i) +  String.format("%02x ", memory[i])).toUpperCase() + "\n");
+        }
+        return strBuild.toString();
+    }
+
+    
 
 
     
@@ -331,4 +343,9 @@ public class Processor implements ProcessorInterface{
 
     
         
+    @Override
+    public Byte[][] getMemory() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getMemory'");
+    }
 }
