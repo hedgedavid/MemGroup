@@ -11,7 +11,7 @@ public interface ProcessorInterface {
      * Return current saved data in memory
      * @return memory
      */
-    public Byte[][] getMemory();
+    public Byte[] getMemory();
 
     /**
      * 

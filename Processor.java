@@ -343,8 +343,11 @@ public class Processor implements ProcessorInterface{
     
         
     @Override
-    public Byte[][] getMemory() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getMemory'");
+    public Byte[] getMemory() {
+        Byte[] copy = new Byte[memory.length];
+        for(int i = 0; i < memory.length; i++){
+            copy[i] = memory[i];
+        }
+        return copy;
     }
 }
