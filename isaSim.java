@@ -222,6 +222,9 @@ public class isaSim {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(memOutput))) {
             bw.write(processor.toStringHex());
             bw.newLine();
+
+            bw.write("Total instructions executed: " + instructCount);
+            bw.newLine();
         } catch (IOException e) {
             System.err.println("Could not write memory to file: " + e.getMessage());
         }
@@ -294,19 +297,10 @@ public class isaSim {
             strBuild.append(line.substring(5) + "\n");
             }
 
-            Integer.paes
-
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-<<<<<<< HEAD
-
-        
-        
-        return program;
-=======
         return strBuild.toString();
->>>>>>> e73b4d67aae1cc464da77977c81b3ed6fc44da83
     }
 }
