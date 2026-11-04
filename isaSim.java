@@ -227,46 +227,6 @@ public class isaSim {
         }
     }
 
-    // private static void writeOutputC(int instructCount, Map<String, Integer> count, Processor processor) {
-    //     String benchmarkName = getBenchmarkName(asFile);
-    //     Byte[][] mem = processor.getMemory();
-    //     // Write instruction count to a file called <benchmarkName>.instrCount
-    //     String output = benchmarkName + ".instrCount";
-    //     // Write memory output to a file named <benchmarkName>.mem.out
-    //     String memOutput = benchmarkName + ".mem.out";
-
-    //     // Write the total amount of instructions executed to the output file
-    //     try (BufferedWriter bw = new BufferedWriter(new FileWriter(output))) {
-    //         for (Map.Entry<String, Integer> entry : count.entrySet()) {
-    //             bw.write(entry.getKey() + " : " + entry.getValue());
-    //             bw.newLine();
-    //         }
-
-    //         bw.write("Total instructions executed: " + instructCount);
-    //         bw.newLine();
-    //     } catch (IOException e) {
-    //         System.err.println("Could not write instruction count to file: " + e.getMessage());
-    //     }
-
-    //     // Write the final contents of the memory to the output file
-    //     try (BufferedWriter bw = new BufferedWriter(new FileWriter(memOutput))) {
-    //         for (Byte[] row : mem) {
-    //             int byte1 = row[0]; // may need to be adjusted to account for null memory slots
-    //             int byte2 = row[1];
-
-    //             String hex1 = Integer.toHexString(byte1);
-    //             String hex2 = Integer.toHexString(byte2);
-
-    //             bw.write(hex1 + hex2);
-    //             bw.newLine();
-    //         }
-
-    //         bw.write("Total instructions executed: " + instructCount);
-    //         bw.newLine();
-    //     } catch (IOException e) {
-    //         System.err.println("Could not write memory to file: " + e.getMessage());
-    //     }
-    // }
 
     /**
      * Private method to extract a given benchmark's file name
