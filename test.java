@@ -50,7 +50,7 @@ public class test {
 
 
         
-        System.out.println(processor.toStringHex());
+        System.out.println(processor.toString());
         
     }
 }

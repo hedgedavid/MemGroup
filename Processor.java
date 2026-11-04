@@ -210,9 +210,9 @@ public class Processor implements ProcessorInterface{
     
     @Override 
     public void STORE(Byte[] register1, Byte[] register2) {
-        int iAddress = (int)(((register2[0] & 0x0F) << 8) | (register2[1] & 0xFF));
-        memory[ iAddress] = register1[0];
-        memory[ iAddress + 1] = register1[1];
+        int iAddress = (int)(((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF));
+        memory[ iAddress] = register2[0];
+        memory[ iAddress + 1] = register2[1];
     }
 
     

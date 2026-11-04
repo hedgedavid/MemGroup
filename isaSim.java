@@ -204,7 +204,7 @@ public class isaSim {
      */
     private static void writeOutput(String asFile, int instructCount, Map<String, Integer> count, Processor processor) {
         String benchmarkName = getBenchmarkName(asFile);
-        Byte[][] mem = processor.getMemory();
+        Byte[] mem = processor.getMemory();
         // Write instruction count to a file called <benchmarkName>.instrCount
         String output = benchmarkName + ".instrCount";
         // Write memory output to a file named <benchmarkName>.mem.out
@@ -312,10 +312,15 @@ public class isaSim {
             strBuild.append(line.substring(5) + "\n");
             }
 
+            Integer.paes
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        
+        
         return program;
     }
 }
