@@ -222,9 +222,6 @@ public class isaSim {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(memOutput))) {
             bw.write(processor.toStringHex());
             bw.newLine();
-
-            bw.write("Total instructions executed: " + instructCount);
-            bw.newLine();
         } catch (IOException e) {
             System.err.println("Could not write memory to file: " + e.getMessage());
         }
