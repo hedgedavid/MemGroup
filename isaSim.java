@@ -85,57 +85,64 @@ public class isaSim {
     @SuppressWarnings("UseSpecificCatch")
     private static void StepByStep(String asFile, String memFile) {
         Scanner scn = new Scanner(System.in);
+        int skip = 0;
         
-        try {
-            String program = Files.readString(Paths.get(asFile));
-            Processor processor = new Processor(program);
+        Processor processor = new Processor(asFile);
 
-            int totalInstructions = 0;
-            Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
+        int totalInstructions = 0;
+        Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
 
-            while(!processor.isHalt) {
-                System.out.println("Current PC: " + processor.getPC());
-                System.out.println("Total instructions executed: " + totalInstructions);
-                System.out.println("Press enter to continue");
-
-                processor.executeInstructions();
-                totalInstructions++;
+        while(!processor.isHalt) {
+            System.out.println("Current PC: " + processor.getPC());
+            System.out.println("Total instructions executed: " + totalInstructions);
+            System.out.println("Press enter to continue");
+            if (skip <= 0){
+                try {
+                    skip = Integer.parseInt(scn.nextLine());
+                } catch (Exception e) {
+                    System.out.println("Must enter a valid integer. 0 for now.");
+                }
+            } else {
+                skip--;
             }
 
-            writeOutput(asFile, totalInstructions, count, processor);
-
-        } catch (IOException e) {
-            System.err.println("Could not load program string: " + e);
+            processor.executeInstructions();
+            totalInstructions++;
         }
 
+        writeOutput(asFile, totalInstructions, count, processor);
         scn.close();
     }
 
 
     private static void StepByStepC(String file) {
         Scanner scn = new Scanner(System.in);
+        int skip = 0;
         
-        try {
-            String program = Files.readString(Paths.get(file));
-            Processor processor = new Processor(asParser(program));
+        Processor processor = new Processor(asParser(file));
 
-            int totalInstructions = 0;
-            Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
+        int totalInstructions = 0;
+        Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
 
-            while(!processor.isHalt) {
-                System.out.println("Current PC: " + processor.getPC());
-                System.out.println("Total instructions executed: " + totalInstructions);
-                System.out.println("Press enter to continue");
-
-                processor.executeInstructions();
-                totalInstructions++;
+        while(!processor.isHalt) {
+            System.out.println("Current PC: " + processor.getPC());
+            System.out.println("Total instructions executed: " + totalInstructions);
+            System.out.println("Press enter to continue");
+            if (skip <= 0){
+                try {
+                    skip = Integer.parseInt(scn.nextLine());
+                } catch (Exception e) {
+                    System.out.println("Must enter a valid integer. 0 for now.");
+                }
+            } else {
+                skip--;
             }
 
-            writeOutput(file, totalInstructions, count, processor);
-
-        } catch (IOException e) {
-            System.err.println("Could not load program string: " + e);
+            processor.executeInstructions();
+            totalInstructions++;
         }
+
+        writeOutput(file, totalInstructions, count, processor);
 
         scn.close();
     }
@@ -151,44 +158,32 @@ public class isaSim {
      * @param memFile memory File
      */
     private static void RunThrough(String asFile, String memFile) {
-        try {
-            String program = Files.readString(Paths.get(asFile));
-            Processor processor = new Processor(program);
+        Processor processor = new Processor(asFile);
 
-            int totalInstructions = 0;
-            Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
+        int totalInstructions = 0;
+        Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
 
-            while(!processor.isHalt) {
-                processor.executeInstructions();
-                totalInstructions++;
-            }
-
-            writeOutput(asFile, totalInstructions, count, processor);
-
-        } catch (IOException e) {
-            System.err.println("Could not load program string: " + e);
+        while(!processor.isHalt) {
+            processor.executeInstructions();
+            totalInstructions++;
         }
+
+        writeOutput(asFile, totalInstructions, count, processor);
     }
 
 
     private static void RunThroughC(String file) {
-        try {
-            String program = Files.readString((Paths.get(file)));
-            Processor processor = new Processor(asParser(program));
+        Processor processor = new Processor(asParser(file));
 
-            int totalInstructions = 0;
-            Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
+        int totalInstructions = 0;
+        Map<String, Integer> count = new HashMap<>(); // For the number of times an element has been found in a list
 
-            while(!processor.isHalt) {
-                processor.executeInstructions();
-                totalInstructions++;
-            }
-
-            writeOutput(file, totalInstructions, count, processor);
-
-        } catch (IOException e) {
-            System.err.println("Could not load program string: " + e);
+        while(!processor.isHalt) {
+            processor.executeInstructions();
+            totalInstructions++;
         }
+
+        writeOutput(file, totalInstructions, count, processor);
     }
 
 
@@ -225,18 +220,7 @@ public class isaSim {
 
         // Write the final contents of the memory to the output file
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(memOutput))) {
-            for (Byte[] row : mem) {
-                int byte1 = row[0]; // may need to be adjusted to account for null memory slots
-                int byte2 = row[1];
-
-                String hex1 = Integer.toHexString(byte1);
-                String hex2 = Integer.toHexString(byte2);
-
-                bw.write(hex1 + hex2);
-                bw.newLine();
-            }
-
-            bw.write("Total instructions executed: " + instructCount);
+            bw.write(processor.toStringHex());
             bw.newLine();
         } catch (IOException e) {
             System.err.println("Could not write memory to file: " + e.getMessage());
@@ -297,11 +281,9 @@ public class isaSim {
     }
 
     private static String asParser(String fileName) {
-        String program = null; 
-
         StringBuilder strBuild = new StringBuilder();
-        FileReader fileReader = null;
-        BufferedReader bufRead = null;
+        FileReader fileReader;
+        BufferedReader bufRead;
         try {
             fileReader = new FileReader(fileName);
             bufRead = new BufferedReader(fileReader);
@@ -318,9 +300,13 @@ public class isaSim {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+<<<<<<< HEAD
 
         
         
         return program;
+=======
+        return strBuild.toString();
+>>>>>>> e73b4d67aae1cc464da77977c81b3ed6fc44da83
     }
 }
