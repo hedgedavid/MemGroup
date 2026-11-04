@@ -204,7 +204,7 @@ public class isaSim {
      */
     private static void writeOutput(String asFile, int instructCount, Map<String, Integer> count, Processor processor) {
         String benchmarkName = getBenchmarkName(asFile);
-        Byte[][] mem = processor.getMemory();
+        Byte[] mem = processor.getMemory();
         // Write instruction count to a file called <benchmarkName>.instrCount
         String output = benchmarkName + ".instrCount";
         // Write memory output to a file named <benchmarkName>.mem.out
@@ -225,14 +225,8 @@ public class isaSim {
 
         // Write the final contents of the memory to the output file
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(memOutput))) {
-            for (Byte[] row : mem) {
-                int byte1 = row[0]; // may need to be adjusted to account for null memory slots
-                int byte2 = row[1];
-
-                String hex1 = Integer.toHexString(byte1);
-                String hex2 = Integer.toHexString(byte2);
-
-                bw.write(hex1 + hex2);
+            for (Byte row : mem) {
+                bw.write(row.toString());
                 bw.newLine();
             }
 
