@@ -21,7 +21,7 @@ public class ProcessorTest {
 
 
    private Processor processor;
-   String mem = "0000\n1000\n2000\n3000\n4000\n5000\n6000\n7000\n8000\n9000\nA000\nB000\nC000\nD000\nE000\nF000";
+   String mem = "00\n00\n10\n00\n20\n00\n30\n00\n40\n00\n50\n00\n60\n00\n70\n00\n80\n00\n90\n00\nA0\n00\nB0\n00\nC0\n00\nD0\n00\nE0\n00\nF0\n00";
 
    @Test
    void testCreateProcessorClass(){
