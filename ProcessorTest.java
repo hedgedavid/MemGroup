@@ -179,7 +179,10 @@ public class ProcessorTest {
 
      short expected = (short)0x8000;
 
-     short result = (short)((short)((register1[0] & 0xFF) << 8) | 
+     short result = (short)((short)((register1[0] & 0xFF) << 8) | (register1[1] & 0xFF));
+
+          assertEquals(expected, result);
+   }
 
 
 }
